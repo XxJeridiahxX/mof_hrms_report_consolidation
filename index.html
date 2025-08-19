@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All-in-One Attendance Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="p-4 sm:p-6 lg:p-8">
+
+    <div class="max-w-screen-2xl mx-auto">
+        <div class="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-sm pt-4 pb-2">
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-4">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Attendance Dashboard</h1>
+                <button id="global-add-time-btn"
+                    title="Add a new time entry for any employee"
+                    class="flex items-center justify-center px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                    <i class="bi bi-plus-circle-fill mr-2"></i>
+                    Add New Time Entry
+                </button>
+            </div>
+
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <div class="flex flex-col gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Staff Member</label>
+                            <div class="relative mt-1">
+                                <div id="staff-selector"
+                                    class="flex flex-wrap gap-1 items-center p-2 border border-gray-300 rounded-md bg-white cursor-pointer filter-element overflow-y-auto">
+                                    <span id="staff-placeholder" class="text-gray-500">Select Staff...</span>
+                                </div>
+                                <div id="staff-dropdown"
+                                    class="hidden absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-300">
+                                    <input type="text" id="staff-search" placeholder="Search staff..."
+                                        class="w-full p-2 border-b border-gray-200 focus:outline-none">
+                                    <ul id="staff-list" class="max-h-60 overflow-y-auto custom-scrollbar"></ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label for="fromDate" class="block text-sm font-medium text-gray-700">From Date</label>
+                            <input type="date" id="fromDate"
+                                class="mt-1 block w-full border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 filter-element">
+                        </div>
+                        <div class="md:col-span-1">
+                            <label for="toDate" class="block text-sm font-medium text-gray-700">To Date</label>
+                            <input type="date" id="toDate"
+                                class="mt-1 block w-full border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2 filter-element">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Department</label>
+                            <div class="relative mt-1">
+                                <div id="department-selector"
+                                    class="flex flex-wrap gap-1 items-center p-2 border border-gray-300 rounded-md bg-white cursor-pointer filter-element overflow-y-auto">
+                                    <span id="department-placeholder" class="text-gray-500">Select Departments...</span>
+                                </div>
+                                <div id="department-dropdown"
+                                    class="hidden absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-300">
+                                    <input type="text" id="department-search" placeholder="Search departments..."
+                                        class="w-full p-2 border-b border-gray-200 focus:outline-none">
+                                    <ul id="department-list" class="max-h-60 overflow-y-auto custom-scrollbar"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-4 items-end">
+                        <div class="md:col-span-1">
+                            <label for="employeeType" class="block text-sm font-medium text-gray-700">Emp. Type</label>
+                            <select id="employeeType"
+                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md filter-element">
+                                <option>All</option>
+                                <option>Hourly</option>
+                                <option>Salary</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label for="statusFilter" class="block text-sm font-medium text-gray-700">Status</label>
+                            <select id="statusFilter"
+                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md filter-element">
+                                <option>Active</option>
+                                <option>Archived</option>
+                                <option>All</option>
+                            </select>
+                        </div>
+                        <div class="col-start-2 md:col-start-6 md:col-span-1">
+                            <button id="submitFilters" title="Apply the selected filters to the data"
+                                class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out filter-element">
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm overflow-x-auto mt-6">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                            data-sort-by="name">
+                            <div class="flex items-center">
+                                <span>Staff Name</span>
+                                <span class="ml-1 opacity-20" data-sort-icon="name"><i class="bi bi-arrow-down-up"></i></span>
+                            </div>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Punch Date</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Punch In</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Punch Out</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                            data-sort-by="hours">
+                            <div class="flex items-center">
+                                <span>Working Hours</span>
+                                <span class="ml-1 opacity-20" data-sort-icon="hours"><i class="bi bi-arrow-down-up"></i></span>
+                            </div>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="attendance-table-body" class="bg-white divide-y divide-gray-200">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="modal-backdrop" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"></div>
+    <div id="profile-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md transform transition-all">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-lg font-medium text-gray-900">Employee Profile</h3><button class="text-gray-400 hover:text-gray-600"
+                    onclick="closeModal('profile-modal')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600">This is a placeholder for the employee profile modification screen.</p>
+            </div>
+            <div class="flex justify-end p-4 bg-gray-50 rounded-b-lg"><button
+                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                    onclick="closeModal('profile-modal')">Close</button></div>
+        </div>
+    </div>
+    <div id="add-time-modal" class="hidden fixed inset-0 z-50 flex items-start justify-center p-4 pt-10 overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl transform transition-all mb-8">
+            <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10">
+                <h3 id="add-time-title" class="text-lg font-medium text-gray-900">Add New Time Entry</h3><button
+                    class="text-gray-400 hover:text-gray-600" onclick="closeModal('add-time-modal')"><i
+                        class="bi bi-x-lg"></i></button>
+            </div>
+            <div id="add-time-body" class="p-6 space-y-4"></div>
+            <div id="add-time-footer" class="flex justify-between items-center p-4 bg-gray-50 rounded-b-lg sticky bottom-0"></div>
+        </div>
+    </div>
+    <div id="punch-details-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md transform transition-all">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-lg font-medium text-gray-900">Punch Details</h3><button class="text-gray-400 hover:text-gray-600"
+                    onclick="closeModal('punch-details-modal')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-700"><strong class="font-medium">IP Address:</strong> 192.168.1.10 (Mock Data)</p>
+                <p class="text-gray-700"><strong class="font-medium">Location:</strong> Main Office, Building A (Mock
+                    Data)</p>
+            </div>
+            <div class="flex justify-end p-4 bg-gray-50 rounded-b-lg"><button
+                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                    onclick="closeModal('punch-details-modal')">Close</button></div>
+        </div>
+    </div>
+    <div id="update-time-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md transform transition-all">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="update-time-title" class="text-lg font-medium text-gray-900">Update Time Clock</h3><button
+                    class="text-gray-400 hover:text-gray-600" onclick="closeModal('update-time-modal')"><i
+                        class="bi bi-x-lg"></i></button>
+            </div>
+            <div id="update-time-body" class="p-6"></div>
+            <div id="update-time-footer" class="flex justify-end p-4 bg-gray-50 rounded-b-lg"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
