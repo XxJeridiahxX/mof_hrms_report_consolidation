@@ -97,6 +97,9 @@ document.addEventListener('DOMContentLoaded', function () {
                          <button class="text-blue-600 hover:text-blue-800" title="View Profile" onclick="openProfileModal(${employee.id})"> 
                              <i class="bi bi-person-circle text-lg"></i> 
                          </button> 
+                         <button class="text-green-600 hover:text-green-800" title="Add New Time Entry" onclick="openAddTimeModalForEmployee(${employee.id})">
+                             <i class="bi bi-calendar-plus text-lg"></i>
+                         </button>
                      </div> 
                  </td> 
              `;
@@ -228,6 +231,15 @@ document.addEventListener('DOMContentLoaded', function () {
         let groupedDataArray = Object.values(groupedByEmployee);
         const sortedData = sortGroupedData(groupedDataArray);
         renderTable(sortedData);
+
+        if (window.innerWidth < 640) {
+            const collapsibleFilters = document.getElementById('collapsible-filters');
+            const toggleFiltersText = document.getElementById('toggle-filters-text');
+            const mobileSubmitContainer = document.getElementById('mobile-submit-container');
+            collapsibleFilters.classList.add('hidden');
+            toggleFiltersText.textContent = 'Show Filters';
+            mobileSubmitContainer.classList.add('hidden');
+        }
     }
 
     // --- MULTI-SELECT EVENT HANDLING --- 
@@ -253,69 +265,25 @@ document.addEventListener('DOMContentLoaded', function () {
     window.openProfileModal = (employeeId) => openModal('profile-modal');
     window.openPunchDetailsModal = (entryId) => openModal('punch-details-modal');
 
-    function openGlobalAddTimeModal() {
+    function openAddTimeModalForEmployee(employeeId) {
         const body = document.getElementById('add-time-body');
         const footer = document.getElementById('add-time-footer');
-        body.innerHTML = ''; footer.innerHTML = '';
+        body.innerHTML = ''; 
+        footer.innerHTML = '';
 
-        const selectorContainer = document.createElement('div');
-        selectorContainer.className = 'relative';
-        selectorContainer.innerHTML = ` 
-             <label for="modal-staff-search" class="block text-sm font-medium text-gray-700">Select Staff Member</label> 
-             <div id="modal-staff-selector-display" class="mt-1 flex items-center justify-between w-full p-2 text-base border border-gray-300 rounded-md bg-white cursor-pointer"> 
-                 <span id="modal-staff-selector-text" class="text-gray-500">-- Select an employee --</span> 
-                 <i class="bi bi-chevron-down text-gray-400"></i> 
-             </div> 
-             <input type="hidden" id="modal-selected-employee-id"> 
-             <div id="modal-staff-dropdown" class="hidden absolute z-20 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-300"> 
-                 <input type="text" id="modal-staff-search-input" placeholder="Search staff..." class="w-full p-2 border-b border-gray-200 focus:outline-none"> 
-                 <ul id="modal-staff-list" class="max-h-60 overflow-y-auto custom-scrollbar"></ul> 
-             </div> 
-         `;
+        const employee = employees.find(e => e.id == employeeId);
+        document.getElementById('add-time-title').textContent = `Add New Time Entry for ${employee.firstName} ${employee.lastName}`;
 
         const timeFieldsContainer = document.createElement('div');
         timeFieldsContainer.id = 'modal-time-fields-container';
         timeFieldsContainer.className = 'space-y-4 pt-4';
-        body.appendChild(selectorContainer);
         body.appendChild(timeFieldsContainer);
 
-        const display = selectorContainer.querySelector('#modal-staff-selector-display');
-        const dropdown = selectorContainer.querySelector('#modal-staff-dropdown');
-        const searchInput = selectorContainer.querySelector('#modal-staff-search-input');
-        const list = selectorContainer.querySelector('#modal-staff-list');
-        const displayText = selectorContainer.querySelector('#modal-staff-selector-text');
-        const hiddenInput = selectorContainer.querySelector('#modal-selected-employee-id');
-
-        function renderModalStaffList(term = '') {
-            list.innerHTML = '';
-            employees.filter(e => e.status === 'Active' && `${e.firstName} ${e.lastName}`.toLowerCase().includes(term.toLowerCase()))
-                .forEach(emp => {
-                    const li = document.createElement('li');
-                    li.className = 'p-2 hover:bg-gray-100 cursor-pointer';
-                    li.textContent = `${emp.lastName}, ${emp.firstName}`;
-                    li.dataset.id = emp.id;
-                    li.onclick = () => {
-                        hiddenInput.value = emp.id;
-                        displayText.textContent = `${emp.lastName}, ${emp.firstName}`;
-                        displayText.classList.remove('text-gray-500');
-                        dropdown.classList.add('hidden');
-                        renderTimeFieldsForEmployee(emp.id, timeFieldsContainer, footer);
-                    };
-                    list.appendChild(li);
-                });
-        }
-
-        display.onclick = () => {
-            dropdown.classList.toggle('hidden');
-            if (!dropdown.classList.contains('hidden')) {
-                renderModalStaffList();
-                searchInput.focus();
-            }
-        };
-        searchInput.oninput = () => renderModalStaffList(searchInput.value);
-
+        renderTimeFieldsForEmployee(employeeId, timeFieldsContainer, footer);
         openModal('add-time-modal');
     }
+    window.openAddTimeModalForEmployee = openAddTimeModalForEmployee;
+
     function updateRemoveButtonsVisibility() {
         const timeSlots = document.querySelectorAll('#modal-time-fields-container .time-period-group');
         const show = timeSlots.length > 1;
@@ -415,6 +383,47 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- INITIALIZATION --- 
     function init() {
+        const toggleFiltersBtn = document.getElementById('toggle-filters-btn');
+        const collapsibleFilters = document.getElementById('collapsible-filters');
+        const toggleFiltersText = document.getElementById('toggle-filters-text');
+        const mobileSubmitContainer = document.getElementById('mobile-submit-container');
+        const mobileSubmitBtn = document.getElementById('mobile-submit-btn');
+        mobileSubmitBtn.addEventListener('click', applyFilters);
+
+        function setInitialFilterVisibility() {
+            if (window.innerWidth < 640) { // Tailwind's 'sm' breakpoint
+                collapsibleFilters.classList.add('hidden');
+                toggleFiltersText.textContent = 'Show Filters';
+                mobileSubmitContainer.classList.add('hidden');
+            } else {
+                collapsibleFilters.classList.remove('hidden');
+                toggleFiltersText.textContent = 'Hide Filters';
+                mobileSubmitContainer.classList.add('hidden');
+            }
+        }
+
+        toggleFiltersBtn.addEventListener('click', () => {
+            collapsibleFilters.classList.toggle('hidden');
+            const isHidden = collapsibleFilters.classList.contains('hidden');
+            toggleFiltersText.textContent = isHidden ? 'Show Filters' : 'Hide Filters';
+            mobileSubmitContainer.classList.toggle('hidden', isHidden);
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 640) {
+                collapsibleFilters.classList.remove('hidden');
+                toggleFiltersText.textContent = 'Hide Filters';
+                mobileSubmitContainer.classList.add('hidden');
+            } else {
+                // If window is resized to mobile, hide filters by default
+                collapsibleFilters.classList.add('hidden');
+                toggleFiltersText.textContent = 'Show Filters';
+                mobileSubmitContainer.classList.add('hidden');
+            }
+        });
+
+        setInitialFilterVisibility();
+        
         fromDateEl.value = '2025-08-12';
         toDateEl.value = '2025-08-14';
         generateMockData();
@@ -453,7 +462,6 @@ document.addEventListener('DOMContentLoaded', function () {
         tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-8 text-gray-500">Adjust filters and click 'Submit' to view attendance records.</td></tr>`;
 
         document.getElementById('submitFilters').addEventListener('click', applyFilters);
-        document.getElementById('global-add-time-btn').addEventListener('click', openGlobalAddTimeModal);
     }
 
     init();
