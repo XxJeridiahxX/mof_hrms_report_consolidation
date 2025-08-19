@@ -235,10 +235,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.innerWidth < 640) {
             const collapsibleFilters = document.getElementById('collapsible-filters');
             const toggleFiltersText = document.getElementById('toggle-filters-text');
-            const mobileSubmitContainer = document.getElementById('mobile-submit-container');
             collapsibleFilters.classList.add('hidden');
             toggleFiltersText.textContent = 'Show Filters';
-            mobileSubmitContainer.classList.add('hidden');
         }
     }
 
@@ -394,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (window.innerWidth < 640) { // Tailwind's 'sm' breakpoint
                 collapsibleFilters.classList.add('hidden');
                 toggleFiltersText.textContent = 'Show Filters';
-                mobileSubmitContainer.classList.add('hidden');
+                mobileSubmitContainer.classList.remove('hidden'); // Ensure mobile submit button is visible
             } else {
                 collapsibleFilters.classList.remove('hidden');
                 toggleFiltersText.textContent = 'Hide Filters';
@@ -406,7 +404,6 @@ document.addEventListener('DOMContentLoaded', function () {
             collapsibleFilters.classList.toggle('hidden');
             const isHidden = collapsibleFilters.classList.contains('hidden');
             toggleFiltersText.textContent = isHidden ? 'Show Filters' : 'Hide Filters';
-            mobileSubmitContainer.classList.toggle('hidden', isHidden);
         });
 
         window.addEventListener('resize', () => {
@@ -418,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // If window is resized to mobile, hide filters by default
                 collapsibleFilters.classList.add('hidden');
                 toggleFiltersText.textContent = 'Show Filters';
-                mobileSubmitContainer.classList.add('hidden');
+                mobileSubmitContainer.classList.remove('hidden'); // Ensure mobile submit button is visible
             }
         });
 
